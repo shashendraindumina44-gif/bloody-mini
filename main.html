@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLOODY ROSE MD - PAIRING</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body{
+  height:100vh;
+  overflow:hidden;
+  background: #000;
+}
+
+/* ===== Background Video ===== */
+video.bg-video{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:-1;
+  filter:brightness(0.3) saturate(1.5); /* Bloody Rose Mood */
+}
+
+/* ===== Center ===== */
+.container{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+/* ===== Box ===== */
+.box{
+  width:350px;
+  padding:30px;
+  background:rgba(0,0,0,0.85);
+  border-radius:20px;
+  text-align:center;
+  position:relative;
+  border: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+/* Red Glow/RGB Border */
+.box::before{
+  content:"";
+  position:absolute;
+  inset:-4px;
+  border-radius:24px;
+  background:linear-gradient(90deg, #ff0000, #990000, #660000, #ff0000);
+  z-index:-1;
+  filter:blur(10px);
+  animation:borderRGB 4s linear infinite;
+}
+
+@keyframes borderRGB{
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* ===== BLOODY ROSE TITLE ===== */
+.rgb-text{
+  font-size:24px;
+  font-weight:bold;
+  letter-spacing: 2px;
+  color: #ff0000;
+  text-shadow: 0 0 15px #ff0000;
+  margin-bottom: 5px;
+}
+
+h6.creator{
+  color:#ff9999;
+  margin-top:5px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+h6.instruction{
+  color:#ccc;
+  margin-top:15px;
+  font-size: 13px;
+}
+
+/* ===== Input Section ===== */
+.input-container{
+  display:flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top:20px;
+}
+
+.input-container input{
+  width:100%;
+  height:50px;
+  border:1px solid #ff0000;
+  outline:none;
+  border-radius:12px;
+  padding: 0 15px;
+  font-size:16px;
+  background: rgba(255, 0, 0, 0.1);
+  color: white;
+  text-align: center;
+}
+
+.input-container button{
+  width:100%;
+  height:50px;
+  border:none;
+  border-radius:12px;
+  background:#ff0000;
+  color: white;
+  font-weight:bold;
+  font-size: 16px;
+  cursor:pointer;
+  transition: 0.3s;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.input-container button:hover{
+  background:#b30000;
+  transform: scale(1.02);
+}
+
+/* ===== Pairing Code Display ===== */
+#pair{
+    margin-top: 20px;
+    min-height: 40px;
+}
+
+#copy{
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px dashed #ff0000;
+    cursor: pointer;
+}
+
+/* ===== Music Button (Lord Indumina Style) ===== */
+.music-btn{
+  position:fixed;
+  left:20px;
+  bottom:25px;
+  background:#ff0000;
+  color:white;
+  padding:12px 20px;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 0 15px rgba(255, 0, 0, 0.6);
+  z-index:10;
+  transition: 0.3s;
+}
+
+.music-btn:hover{
+  background:#990000;
+}
+</style>
+</head>
+
+<body>
+
+<video class="bg-video" autoplay muted loop>
+  <source src="https://files.catbox.moe/dlcamg.mp4" type="video/mp4">
+</video>
+
+<div class="container">
+  <div class="box">
+    <i class="fa fa-skull" style="color:#ff0000;font-size:30px; margin-bottom: 10px;"></i>
+
+    <div class="rgb-text">BLOODY ROSE MD</div>
+    <h6 class="creator">MASTER: LORD INDUMINA 💉</h6>
+    
+    <h6 class="instruction">📢 Enter WhatsApp number with country code</h6>
+
+    <div class="input-container">
+      <input type="number" id="number" placeholder="9476xxxxxxx">
+      <button id="submit">GENERATE CODE 🌹</button>
+    </div>
+
+    <main id="pair"></main>
+  </div>
+</div>
+
+<audio id="bgMusic" loop>
+  <source src="https://files.catbox.moe/zko0jc.mp3" type="audio/mp3">
+</audio>
+
+<div class="music-btn" onclick="toggleMusic()" id="musicBtn">
+  <i class="fa fa-play"></i> PLAY AUDIO
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
+
+<script>
+let a=document.getElementById("pair");
+let b=document.getElementById("submit");
+let c=document.getElementById("number");
+
+let music=document.getElementById("bgMusic");
+let musicBtn=document.getElementById("musicBtn");
+let started=false;
+
+/* Auto-play logic */
+document.body.addEventListener("click",()=>{
+  if(!started){
+    music.play().then(()=>{
+      musicBtn.innerHTML='<i class="fa fa-pause"></i> PAUSE';
+      started=true;
+    }).catch(()=>{});
+  }
+},{once:true});
+
+function toggleMusic(){
+  if(music.paused){
+    music.play();
+    musicBtn.innerHTML='<i class="fa fa-pause"></i> PAUSE';
+  }else{
+    music.pause();
+    musicBtn.innerHTML='<i class="fa fa-play"></i> PLAY';
+  }
+}
+
+async function Copy(){
+  let obj=document.getElementById("copyText");
+  await navigator.clipboard.writeText(obj.innerText);
+  document.getElementById("copy").innerHTML='<span style="color:#00ff00">COPIED TO CLIPBOARD!</span>';
+}
+
+b.addEventListener("click",async(e)=>{
+  e.preventDefault();
+  if(!c.value){
+    a.innerHTML='<span style="color:white">Master, enter your number first!</span>';
+  }else if(c.value.replace(/[^0-9]/g,"").length<10){
+    a.innerHTML='<span style="color:#ff5555">Invalid Number Format</span>';
+  }else{
+    let number=c.value.replace(/[^0-9]/g,"");
+    a.innerHTML='<span style="color:#ff9999">Generating Blood Code...</span>';
+    try {
+        let {data}=await axios(`/code?number=${number}`);
+        let code=data.code || "Unavailable";
+        a.innerHTML=`<div id="copy" onclick="Copy()">
+          <span style="color:#ff0000; font-weight:bold;">YOUR CODE:</span> <br>
+          <span id="copyText" style="color:white; font-size:20px; letter-spacing:2px;">${code}</span>
+        </div>`;
+    } catch(e) {
+        a.innerHTML='<span style="color:red">Server Error! Try again.</span>';
+    }
+  }
+});
+</script>
+
+</body>
+</html>
