@@ -40,10 +40,10 @@ const config = {
   RCD_IMAGE_PATH: 'https://i.postimg.cc/gjkQy2Kd/images-(9).jpg',
   NEWSLETTER_JID: '120363421675697127@newsletter',
   OTP_EXPIRY: 300000,
-  OWNER_NUMBER: process.env.OWNER_NUMBER || '94761527735', // ඔයාගේ නම්බර් එක දැම්මා
+  OWNER_NUMBER: process.env.OWNER_NUMBER || '94771483306', // ඔයාගේ නම්බර් එක දැම්මා
   CHANNEL_LINK: 'https://whatsapp.com/channel/0029VbBjdX81XquXcMfqXz2z',
   BOT_NAME: 'BLOODY ROSE MD',
-  BOT_VERSION: '5.0.0V',
+  BOT_VERSION: '1.0.0V',
   OWNER_NAME: 'ＬＯＲＤ ＩＮＤＵＭＩＮＡ 💉',
   IMAGE_PATH: 'https://i.postimg.cc/gjkQy2Kd/images-(9).jpg',
   BOT_FOOTER: '🌹 𝐏𝐎𝐖𝐄𝐑𝐄𝐃 𝐁𝐘 𝐁𝐋𝐎𝐎𝐃Ｙ 𝐑𝐎𝐒𝐄 🌹',
@@ -2616,47 +2616,46 @@ case 'tourl': {
     break;
 }
 
+case 'menu':
+case 'help':
+case 'list': {
+    const from = m.key.remoteJid;
+    const pushname = m.pushName || "User";
+    const myPhoto = 'https://i.postimg.cc/gjkQy2Kd/images-(9).jpg';
+    const prefix = config.PREFIX || '.';
 
-module.exports = {
-    name: 'menu',
-    alias: ['help', 'list'],
-    async execute(sock, m, { ownerName, botName, prefix }) {
-        const from = m.key.remoteJid;
-        const pushname = m.pushName || "User";
-        const myPhoto = 'https://i.postimg.cc/gjkQy2Kd/images-(9).jpg';
+    try {
+        // 1. Reaction
+        await socket.sendMessage(from, { react: { text: "🌹", key: m.key } });
 
-        try {
-            // 1. Reaction
-            await sock.sendMessage(from, { react: { text: "🌹", key: m.key } });
+        // 2. Loading Animation
+        let { key } = await socket.sendMessage(from, { text: "🌹 *BLOODY ROSE: SYSTEM INITIALIZING...*" });
+        
+        const loadingBars = [
+            "🌹 [▒▒▒▒▒▒▒▒▒▒] 10%",
+            "🌹 [███▒▒▒▒▒▒▒] 40%",
+            "🌹 [██████▒▒▒▒] 70%",
+            "🌹 [██████████] 100%",
+            "✨ *SUPREME MENU READY MASTER!*"
+        ];
 
-            // 2. Loading Animation
-            let { key } = await sock.sendMessage(from, { text: "🌹 *BLOODY ROSE: SYSTEM INITIALIZING...*" });
-            
-            const loadingBars = [
-                "🌹 [▒▒▒▒▒▒▒▒▒▒] 10%",
-                "🌹 [███▒▒▒▒▒▒▒] 40%",
-                "🌹 [██████▒▒▒▒] 70%",
-                "🌹 [██████████] 100%",
-                "✨ *SUPREME MENU READY MASTER!*"
-            ];
+        for (let bar of loadingBars) {
+            await new Promise(res => setTimeout(res, 300));
+            await socket.sendMessage(from, { text: bar, edit: key });
+        }
 
-            for (let bar of loadingBars) {
-                await new Promise(res => setTimeout(res, 300));
-                await sock.sendMessage(from, { text: bar, edit: key });
-            }
+        // ලෝඩින් එක මකා දැමීම
+        await socket.sendMessage(from, { delete: key });
 
-            // ලෝඩින් එක මකා දැමීම
-            await sock.sendMessage(from, { delete: key });
-
-            // 3. මෙනු එකේ පෙළ (Help Text)
-            const helpText = `👋 *Greetings, ${pushname}*
+        // 3. මෙනු එකේ පෙළ (Help Text)
+        const helpText = `👋 *Greetings, ${pushname}*
 
 ✨ *B L O O D Y  R O S E  S U P R E M E* ✨
 
 ┌──────────────┈
 │ 👑 *OWNER:* LORD INDUMINA
 │ 🚀 *VERSION:* 4.0.0 (Elite)
-│ 💠 *PREFIX:* ${prefix || '.'}
+│ 💠 *PREFIX:* ${prefix}
 └──────────────┈
 
 🌹 *S Y S T E M  F E A T U R E S*
@@ -2667,42 +2666,40 @@ module.exports = {
 
 > *Created by Lord Indumina 🩸*`;
 
-            // 4. Buttons ටික සකස් කිරීම
-            const buttons = [
-                { buttonId: `${prefix}download`, buttonText: { displayText: "📥 DOWNLOAD" }, type: 1 },
-                { buttonId: `${prefix}creative`, buttonText: { displayText: "🎨 CREATIVE" }, type: 1 },
-                { buttonId: `${prefix}tools`, buttonText: { displayText: "🔧 TOOLS" }, type: 1 },
-                { buttonId: `${prefix}settings`, buttonText: { displayText: "⚙️ SETTINGS" }, type: 1 },
-                { buttonId: `${prefix}owner`, buttonText: { displayText: "👑 OWNER" }, type: 1 }
-            ];
+        // 4. Buttons ටික සකස් කිරීම
+        const buttons = [
+            { buttonId: `${prefix}download`, buttonText: { displayText: "📥 DOWNLOAD" }, type: 1 },
+            { buttonId: `${prefix}creative`, buttonText: { displayText: "🎨 CREATIVE" }, type: 1 },
+            { buttonId: `${prefix}tools`, buttonText: { displayText: "🔧 TOOLS" }, type: 1 },
+            { buttonId: `${prefix}settings`, buttonText: { displayText: "⚙️ SETTINGS" }, type: 1 },
+            { buttonId: `${prefix}owner`, buttonText: { displayText: "👑 OWNER" }, type: 1 }
+        ];
 
-            // 5. මෙනු එක යැවීම (ලොකු Thumbnail එක සහ Buttons සමඟ)
-            await sock.sendMessage(from, { 
-                image: { url: myPhoto }, 
-                caption: helpText,
-                footer: "🔥 BLOODY ROSE ELITE EDITION 🔥",
-                buttons: buttons,
-                headerType: 4,
-                contextInfo: {
-                    externalAdReply: {
-                        thumbnailUrl: myPhoto,
-                        mediaType: 1,
-                        renderLargerThumbnail: true, // ලොකු පින්තූරය පෙන්වීමට
-                        sourceUrl: "https://github.com/Indumina-Lord",
-                        // මෙතන Title සහ Body හිස්ව තැබීමෙන් ඒවා ඉවත් වේ
-                        title: "", 
-                        body: ""
-                    }
+        // 5. මෙනු එක යැවීම
+        await socket.sendMessage(from, { 
+            image: { url: myPhoto }, 
+            caption: helpText,
+            footer: "🔥 BLOODY ROSE ELITE EDITION 🔥",
+            buttons: buttons,
+            headerType: 4,
+            contextInfo: {
+                externalAdReply: {
+                    thumbnailUrl: myPhoto,
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                    sourceUrl: "https://github.com/Indumina-Lord",
+                    title: "", 
+                    body: ""
                 }
-            }, { quoted: m });
+            }
+        }, { quoted: m });
 
-        } catch (e) {
-            console.error("Menu Error: ", e);
-            sock.sendMessage(from, { text: "❌ මෙනු එක සකස් කිරීමේදී දෝෂයක් සිදුවිය!" }, { quoted: m });
-        }
+    } catch (e) {
+        console.error("Menu Error: ", e);
+        await socket.sendMessage(from, { text: "❌ මෙනු එක සකස් කිරීමේදී දෝෂයක් සිදුවිය!" }, { quoted: m });
     }
-};
-
+}
+break;
 // ==================== DOWNLOAD MENU ====================
 case 'download': {
     try { 
