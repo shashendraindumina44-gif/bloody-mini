@@ -2615,7 +2615,7 @@ case 'tourl': {
     }
     break;
 }
-const axios = require('axios');
+
 
 module.exports = {
     name: 'menu',
