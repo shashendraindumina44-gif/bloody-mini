@@ -2616,90 +2616,96 @@ case 'tourl': {
     break;
 }
 
-case 'menu':
-case 'help':
-case 'list': {
-    const from = m.key.remoteJid;
-    const pushname = m.pushName || "User";
-    const myPhoto = 'https://i.postimg.cc/gjkQy2Kd/images-(9).jpg';
-    const prefix = config.PREFIX || '.';
 
-    try {
-        // 1. Reaction
-        await socket.sendMessage(from, { react: { text: "🌹", key: m.key } });
+case 'menu': {
+  try { await socket.sendMessage(sender, { react: { text: "📋", key: msg.key } }); } catch(e){}
 
-        // 2. Loading Animation
-        let { key } = await socket.sendMessage(from, { text: "🌹 *BLOODY ROSE: SYSTEM INITIALIZING...*" });
-        
-        const loadingBars = [
-            "🌹 [▒▒▒▒▒▒▒▒▒▒] 10%",
-            "🌹 [███▒▒▒▒▒▒▒] 40%",
-            "🌹 [██████▒▒▒▒] 70%",
-            "🌹 [██████████] 100%",
-            "✨ *SUPREME MENU READY MASTER!*"
-        ];
+  try {
+    const startTime = socketCreationTime.get(number) || Date.now();
+    const uptime = Math.floor((Date.now() - startTime) / 1000);
+    const hours = Math.floor(uptime / 3600);
+    const minutes = Math.floor((uptime % 3600) / 60);
+    const seconds = Math.floor(uptime % 60);
 
-        for (let bar of loadingBars) {
-            await new Promise(res => setTimeout(res, 300));
-            await socket.sendMessage(from, { text: bar, edit: key });
-        }
+    // load per-session config (logo, botName)
+    let userCfg = {};
+    try { if (number && typeof loadUserConfigFromMongo === 'function') userCfg = await loadUserConfigFromMongo((number || '').replace(/[^0-9]/g, '')) || {}; }
+    catch(e){ console.warn('menu: failed to load config', e); userCfg = {}; }
 
-        // ලෝඩින් එක මකා දැමීම
-        await socket.sendMessage(from, { delete: key });
+    const title = userCfg.botName || '🌹 BLOODY ROSE';
 
-        // 3. මෙනු එකේ පෙළ (Help Text)
-        const helpText = `👋 *Greetings, ${pushname}*
+    // 🔹 Fake contact for Meta AI mention
+    const shonux = {
+        key: {
+            remoteJid: "status@broadcast",
+            participant: "0@s.whatsapp.net",
+            fromMe: false,
+            id: "META_AI_FAKE_ID_MENU"
+        },
+        message: {
+            contactMessage: {
+                displayName: title,
+                vcard: `BEGIN:VCARD
+VERSION:3.0
+N:${title};;;;
+FN:${title}
+ORG:Meta Platforms
+TEL;type=CELL;type=VOICE;waid=13135550002:+1 313 555 0002
+END:VCARD`
+            }
+        }
+    };
 
-✨ *B L O O D Y  R O S E  S U P R E M E* ✨
+    const text = `
+╭─❏ 🤖 BOT STATUS ❏
+│ 👸 ${title}
+│ 👑 Owner : ${config.OWNER_NAME || 'Kavindu • Ishan'}
+│ 🏷️ Ver   : ${config.BOT_VERSION || '0.0001+'}
+│ ☁️ Host  : ${process.env.PLATFORM || 'Heroku'}
+│ ⏱️ Up    : ${hours}h ${minutes}m ${seconds}s
+╰────────❏
 
-┌──────────────┈
-│ 👑 *OWNER:* LORD INDUMINA
-│ 🚀 *VERSION:* 4.0.0 (Elite)
-│ 💠 *PREFIX:* ${prefix}
-└──────────────┈
+📝 *Description*  
+✨ Fast • Simple • Powerful  
+📥 Media Downloader  
+🎨 Creative Tools  
+🔧 Smart Utilities  
 
-🌹 *S Y S T E M  F E A T U R E S*
-✨ Fast • Simple • Powerful 💉
-📥 Media Downloader
-🎨 Creative Tools
-🔧 Smart Utilities
+> © ${config.BOT_FOOTER || '💝 BLOODY ROSE'}
+`.trim();
 
-> *Created by Lord Indumina 🩸*`;
+    const buttons = [
+      { buttonId: `${config.PREFIX}download`, buttonText: { displayText: "📥 DOWNLOAD" }, type: 1 },
+      { buttonId: `${config.PREFIX}creative`, buttonText: { displayText: "🎨 CREATIVE" }, type: 1 },
+      { buttonId: `${config.PREFIX}tools`, buttonText: { displayText: "🔧 TOOLS" }, type: 1 },
+      { buttonId: `${config.PREFIX}settings`, buttonText: { displayText: "⚙️ SETTINGS" }, type: 1 },
+      { buttonId: `${config.PREFIX}owner`, buttonText: { displayText: "👑 OWNER" }, type: 1 }
+    ];
 
-        // 4. Buttons ටික සකස් කිරීම
-        const buttons = [
-            { buttonId: `${prefix}download`, buttonText: { displayText: "📥 DOWNLOAD" }, type: 1 },
-            { buttonId: `${prefix}creative`, buttonText: { displayText: "🎨 CREATIVE" }, type: 1 },
-            { buttonId: `${prefix}tools`, buttonText: { displayText: "🔧 TOOLS" }, type: 1 },
-            { buttonId: `${prefix}settings`, buttonText: { displayText: "⚙️ SETTINGS" }, type: 1 },
-            { buttonId: `${prefix}owner`, buttonText: { displayText: "👑 OWNER" }, type: 1 }
-        ];
+    const defaultImg = 'https://files.catbox.moe/fnuywi.jpg';
+    const useLogo = userCfg.logo || defaultImg;
 
-        // 5. මෙනු එක යැවීම
-        await socket.sendMessage(from, { 
-            image: { url: myPhoto }, 
-            caption: helpText,
-            footer: "🔥 BLOODY ROSE ELITE EDITION 🔥",
-            buttons: buttons,
-            headerType: 4,
-            contextInfo: {
-                externalAdReply: {
-                    thumbnailUrl: myPhoto,
-                    mediaType: 1,
-                    renderLargerThumbnail: true,
-                    sourceUrl: "https://github.com/Indumina-Lord",
-                    title: "", 
-                    body: ""
-                }
-            }
-        }, { quoted: m });
+    // build image payload (url or buffer)
+    let imagePayload;
+    if (String(useLogo).startsWith('http')) imagePayload = { url: useLogo };
+    else {
+      try { imagePayload = fs.readFileSync(useLogo); } catch(e){ imagePayload = { url: defaultImg }; }
+    }
 
-    } catch (e) {
-        console.error("Menu Error: ", e);
-        await socket.sendMessage(from, { text: "❌ මෙනු එක සකස් කිරීමේදී දෝෂයක් සිදුවිය!" }, { quoted: m });
-    }
+    await socket.sendMessage(sender, {
+      image: imagePayload,
+      caption: text,
+      footer: "👸 QUEEN ASHA MINI BOT",
+      buttons,
+      headerType: 4
+    }, { quoted: shonux });
+
+  } catch (err) {
+    console.error('menu command error:', err);
+    try { await socket.sendMessage(sender, { text: '❌ Failed to show menu.' }, { quoted: msg }); } catch(e){}
+  }
+  break;
 }
-break;
 // ==================== DOWNLOAD MENU ====================
 case 'download': {
     try { 
