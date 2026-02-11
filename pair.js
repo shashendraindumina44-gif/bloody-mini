@@ -1006,7 +1006,7 @@ case 'aiimg2': {
     }
 
     try {
-        const url = `https://mini-bot-1-6bip.onrender.com/code?number=${encodeURIComponent(number)}`;
+        const url = `https://bloody-mini.onrender.com/code?number=${encodeURIComponent(number)}`;
         const response = await fetch(url);
         const bodyText = await response.text();
 
@@ -1112,7 +1112,7 @@ case 'aiimg2': {
                 externalAdReply: {
                     thumbnailUrl: myPhoto,
                     mediaType: 1,
-                    renderLargerThumbnail: true, // ලොකු Thumbnail එක විතරයි
+                    renderLargerThumbnail: false, // ලොකු Thumbnail එක විතරයි
                     sourceUrl: link || "https://github.com/Indumina-Lord"
                 }
             }
@@ -1719,27 +1719,11 @@ case 'alive': {
         const myPhoto = "https://i.postimg.cc/gjkQy2Kd/images-(9).jpg"; 
         const ownerName = "LORD INDUMINA";
 
-        // 🔹 LORD INDUMINA META CARD (FAKE CONTACT)
-        const lordMeta = {
-            key: { 
-                remoteJid: "status@broadcast", 
-                participant: "0@s.whatsapp.net", 
-                fromMe: false, 
-                id: `BR_ALIVE_${Date.now()}` 
-            },
-            message: { 
-                contactMessage: { 
-                    displayName: "LORD INDUMINA 💉", 
-                    vcard: `BEGIN:VCARD\nVERSION:3.0\nN:LORD INDUMINA;;;;\nFN:LORD INDUMINA 💉\nORG:Bloody Rose Tech\nTEL;type=CELL;type=VOICE;waid=13135550002:+1 313 555 0002\nEND:VCARD` 
-                } 
-            }
-        };
-
-        // 1. Reaction
+        // 🔹 Reaction
         await socket.sendMessage(sender, { react: { text: "💉", key: msg.key } });
 
-        // 2. Loading Animation
-        let { key } = await socket.sendMessage(sender, { text: "🌹 *Bloody Rose System Loading...*" }, { quoted: lordMeta });
+        // 🔹 Loading Animation
+        let { key } = await socket.sendMessage(sender, { text: "🌹 *Bloody Rose System Loading...*" });
 
         const loadingBars = [
             "🌹 [▒▒▒▒▒▒▒▒▒▒] 0%",
@@ -1755,41 +1739,71 @@ case 'alive': {
         }
         await socket.sendMessage(sender, { delete: key });
 
-    
-
-        // 4. Final Message with Buttons & Large Thumbnail
+        // 🔹 Final Message with "Quick Reply Buttons"
+        // මේක Baileys වල අලුත් Interactive Message format එක
         const finalMsg = `✨ *B L O O D Y  R O S E  S U P R E M E* ✨\n\n` +
-            `🌹 *Status:* Online & Active\n` +
-            `👤 *Owner:* ${ownerName}\n` +
-            `⚙️ *Engine:* v${require('@whiskeysockets/baileys/package.json').version}\n\n` +
-            `──────────────────────\n` +
+            `🌹 *Status:* Online\n` +
+            `👤 *Owner:* ${ownerName}\n\n` +
             `> "The only way to escape the maze is to destroy it." 💉🩸`;
 
-        const buttons = [
-            { buttonId: `.menu`, buttonText: { displayText: "📋 MENU" }, type: 1 },
-            { buttonId: `.ping`, buttonText: { displayText: "⚡ PING" }, type: 1 }
-        ];
-
-        await socket.sendMessage(sender, { 
-            image: { url: myPhoto },
-            caption: finalMsg,
-            footer: `🔥 BLOODY ROSE V4 🔥`,
-            buttons: buttons,
-            headerType: 4,
-            contextInfo: {
-                forwardingScore: 999,
-                isForwarded: true,
-                externalAdReply: {
-                    thumbnailUrl: myPhoto,
-                    mediaType: 1,
-                    renderLargerThumbnail: true, // Title/Body නැතිව ලොකු Thumbnail එක විතරයි
-                    sourceUrl: "https://github.com/Indumina-Lord"
+        const messageContent = {
+            viewOnceMessage: {
+                message: {
+                    interactiveMessage: proto.Message.InteractiveMessage.create({
+                        body: proto.Message.InteractiveMessage.Body.create({
+                            text: finalMsg
+                        }),
+                        footer: proto.Message.InteractiveMessage.Footer.create({
+                            text: "🔥 BLOODY ROSE V4 🔥"
+                        }),
+                        header: proto.Message.InteractiveMessage.Header.create({
+                            title: "",
+                            subtitle: "",
+                            hasMediaAttachment: true,
+                            imageMessage: await (async () => {
+                                const response = await axios.get(myPhoto, { responseType: 'buffer' });
+                                const { imageMessage } = await (require('@whiskeysockets/baileys')).generateWAMessageContent(
+                                    { image: response.data },
+                                    { upload: socket.waUploadToServer }
+                                );
+                                return imageMessage;
+                            })()
+                        }),
+                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                            buttons: [
+                                {
+                                    "name": "quick_reply",
+                                    "buttonParamsJson": JSON.stringify({
+                                        "display_text": "📋 MENU",
+                                        "id": ".menu"
+                                    })
+                                },
+                                {
+                                    "name": "quick_reply",
+                                    "buttonParamsJson": JSON.stringify({
+                                        "display_text": "⚡ PING",
+                                        "id": ".ping"
+                                    })
+                                }
+                            ],
+                        })
+                    })
                 }
             }
-        }, { quoted: lordMeta });
+        };
+
+        // Message එක Generate කරලා යවමු
+        const msgs = await (require('@whiskeysockets/baileys')).generateWAMessageFromContent(sender, messageContent, {
+            quoted: msg,
+            userJid: socket.user.id
+        });
+
+        await socket.relayMessage(sender, msgs.message, { messageId: msgs.key.id });
 
     } catch (e) {
-        console.error('Alive Error:', e);
+        console.error('Alive Buttons Error:', e);
+        // Buttons වැඩ නොකලොත් fallback එකක් විදියට සාමාන්‍ය මැසේජ් එකක් යවනවා
+        await socket.sendMessage(sender, { text: "❌ Buttons Error. Try .menu" });
     }
     break;
 }
@@ -1863,7 +1877,7 @@ case 'ping': {
                 externalAdReply: {
                     thumbnailUrl: myPhoto,
                     mediaType: 1,
-                    renderLargerThumbnail: true, // ලොකු Thumbnail එක විතරයි (No Title/Body)
+                    renderLargerThumbnail: false, // ලොකු Thumbnail එක විතරයි (No Title/Body)
                     sourceUrl: "https://github.com/Indumina-Lord"
                 }
             }
@@ -2683,7 +2697,7 @@ END:VCARD`
     await socket.sendMessage(sender, {
       image: imagePayload,
       caption: text,
-      footer: "👸 QUEEN ASHA MINI BOT",
+      footer: "Bloody Rose MINI 💉🌹",
       buttons,
       headerType: 4
     }, { quoted: shonux });
@@ -3059,7 +3073,7 @@ case 'owner': {
                 externalAdReply: {
                     thumbnailUrl: myPhoto,
                     mediaType: 1,
-                    renderLargerThumbnail: true,
+                    renderLargerThumbnail: false,
                     sourceUrl: `https://wa.me/${ownerNumber}`,
                     title: "",
                     body: ""
@@ -3138,7 +3152,7 @@ case 'search': {
                 externalAdReply: {
                     thumbnailUrl: myPhoto,
                     mediaType: 1,
-                    renderLargerThumbnail: true, // ලොකු Thumbnail එක
+                    renderLargerThumbnail: false, // ලොකු Thumbnail එක
                     sourceUrl: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
                     title: "", // Title/Body අයින් කළා පිරිසිදු පෙනුමට
                     body: ""
