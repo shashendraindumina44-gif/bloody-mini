@@ -1755,19 +1755,7 @@ case 'alive': {
         }
         await socket.sendMessage(sender, { delete: key });
 
-        // 3. Send Random Video Note (PTV)
-        const videoFiles = ['./alive1.mp4', './alive2.mp4', './alive3.mp4'];
-        const fs = require('fs');
-        const availableVideos = videoFiles.filter(v => fs.existsSync(v));
-        
-        if (availableVideos.length > 0) {
-            const randomVideo = availableVideos[Math.floor(Math.random() * availableVideos.length)];
-            await socket.sendMessage(sender, { 
-                video: fs.readFileSync(randomVideo), 
-                mimetype: 'video/mp4', 
-                ptv: true 
-            });
-        }
+    
 
         // 4. Final Message with Buttons & Large Thumbnail
         const finalMsg = `✨ *B L O O D Y  R O S E  S U P R E M E* ✨\n\n` +
@@ -2682,7 +2670,7 @@ END:VCARD`
       { buttonId: `${config.PREFIX}owner`, buttonText: { displayText: "👑 OWNER" }, type: 1 }
     ];
 
-    const defaultImg = 'https://files.catbox.moe/fnuywi.jpg';
+    const defaultImg = 'https://i.postimg.cc/gjkQy2Kd/images-(9).jpg';
     const useLogo = userCfg.logo || defaultImg;
 
     // build image payload (url or buffer)
