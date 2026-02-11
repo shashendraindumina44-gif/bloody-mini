@@ -40,7 +40,7 @@ const config = {
   RCD_IMAGE_PATH: 'https://i.postimg.cc/gjkQy2Kd/images-(9).jpg',
   NEWSLETTER_JID: '120363421675697127@newsletter',
   OTP_EXPIRY: 300000,
-  OWNER_NUMBER: process.env.OWNER_NUMBER || '94771483306', // ඔයාගේ නම්බර් එක දැම්මා
+  OWNER_NUMBER: process.env.OWNER_NUMBER || '94763003966', // ඔයාගේ නම්බර් එක දැම්මා
   CHANNEL_LINK: 'https://whatsapp.com/channel/0029VbBjdX81XquXcMfqXz2z',
   BOT_NAME: 'BLOODY ROSE MD',
   BOT_VERSION: '1.0.0V',
